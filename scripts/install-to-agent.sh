@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Installs the skills in this repo into the current working directory,
-# adapted to the format expected by the chosen agent.
+# Instala as skills deste repositório no diretório de trabalho atual,
+# adaptadas ao formato esperado pelo agente escolhido.
 #
-# Usage: install-to-agent.sh <agent>
+# Uso: install-to-agent.sh <agent>
 #   agent: claude | cursor | codex | antigravity
 #
-# Run this from inside the target repo (the one that will *use* the skills).
+# Rode isto de dentro do repositório de destino (o que vai *usar* as skills).
 
 AGENT="${1:-}"
 SKILLS_REPO="$(cd "$(dirname "$0")/.." && pwd)"
@@ -15,21 +15,21 @@ TARGET="$(pwd)"
 
 if [ -z "$AGENT" ]; then
   cat >&2 <<EOF
-usage: install-to-agent.sh <agent>
+uso: install-to-agent.sh <agent>
 
-agents:
-  claude       symlink skills into .claude/skills/ (project) or ~/.claude/skills (user)
-  cursor       generate .cursor/rules/<name>.mdc files from each SKILL.md
-  codex        append a "## Skills" block to AGENTS.md with skill summaries
-  antigravity  generate .antigravity/skills/<name>.md files
+agentes:
+  claude       cria links simbólicos das skills em .claude/skills/ (projeto) ou ~/.claude/skills (usuário)
+  cursor       gera arquivos .cursor/rules/<name>.mdc a partir de cada SKILL.md
+  codex        adiciona um bloco "## Skills" ao AGENTS.md com resumos das skills
+  antigravity  gera arquivos .antigravity/skills/<name>.md
 
-Run this from the target repo, not the skills repo.
+Rode isto a partir do repositório de destino, não do repositório de skills.
 EOF
   exit 1
 fi
 
 if [ "$TARGET" = "$SKILLS_REPO" ]; then
-  echo "error: run this from the target repo, not the skills repo." >&2
+  echo "erro: rode isto a partir do repositório de destino, não do repositório de skills." >&2
   exit 1
 fi
 
@@ -38,12 +38,12 @@ skill_dirs() {
     xargs -0 -n1 dirname
 }
 
-# Strip YAML frontmatter from a SKILL.md, returning the body.
+# Remove o frontmatter YAML de um SKILL.md, retornando o corpo.
 skill_body() {
   awk 'BEGIN{f=0} /^---$/{f++; next} f>=2{print}' "$1"
 }
 
-# Read a frontmatter field. Usage: fm <file> <field>
+# Lê um campo do frontmatter. Uso: fm <arquivo> <campo>
 fm() {
   awk -v key="$2" '
     BEGIN{f=0}
@@ -66,7 +66,7 @@ case "$AGENT" in
       target="$DEST/$name"
       [ -e "$target" ] && [ ! -L "$target" ] && rm -rf "$target"
       ln -sfn "$src" "$target"
-      echo "linked $name -> $src"
+      echo "link criado: $name -> $src"
     done
     ;;
 
@@ -85,10 +85,10 @@ case "$AGENT" in
         echo
         skill_body "$src/SKILL.md"
       } > "$out"
-      echo "wrote $out"
+      echo "escrito: $out"
     done
     echo
-    echo "Cursor rules written. They are 'manual' rules — invoke with @<skill-name>."
+    echo "Regras do Cursor escritas. São regras 'manuais' — invoque com @<skill-name>."
     ;;
 
   codex)
@@ -101,7 +101,7 @@ case "$AGENT" in
       echo "$BLOCK_START"
       echo "## Skills (skills)"
       echo
-      echo "Installed from https://github.com/Klerith/skills. Each entry is a workflow you can invoke by reading the linked file and following its steps."
+      echo "Instaladas de https://github.com/geraldobl58/skills. Cada entrada é um fluxo de trabalho que você invoca lendo o arquivo linkado e seguindo os passos dele."
       echo
       skill_dirs | while IFS= read -r src; do
         name="$(basename "$src")"
@@ -114,7 +114,7 @@ case "$AGENT" in
       echo "$BLOCK_END"
     } > "$tmp_block"
 
-    # Mirror skill bodies under .codex/skills/ for Codex to read.
+    # Espelha os corpos das skills em .codex/skills/ para o Codex ler.
     mkdir -p "$TARGET/.codex/skills"
     skill_dirs | while IFS= read -r src; do
       name="$(basename "$src")"
@@ -133,7 +133,7 @@ case "$AGENT" in
       cat "$tmp_block" >> "$OUT"
     fi
     rm "$tmp_block"
-    echo "updated $OUT and copied skills into .codex/skills/"
+    echo "$OUT atualizado e skills copiadas para .codex/skills/"
     ;;
 
   antigravity)
@@ -142,12 +142,12 @@ case "$AGENT" in
     skill_dirs | while IFS= read -r src; do
       name="$(basename "$src")"
       cp -R "$src/." "$DEST/$name/"
-      echo "copied $name -> $DEST/$name"
+      echo "copiado: $name -> $DEST/$name"
     done
     ;;
 
   *)
-    echo "unknown agent: $AGENT" >&2
+    echo "agente desconhecido: $AGENT" >&2
     exit 1
     ;;
 esac

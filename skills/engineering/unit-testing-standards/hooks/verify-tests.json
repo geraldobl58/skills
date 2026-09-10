@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "bash .github/hooks/check-test-pairs.sh",
+        "timeout": 30
+      }
+    ]
+  }
+}

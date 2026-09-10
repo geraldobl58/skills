@@ -1,6 +1,8 @@
-# Engineering Skills
+# Skills de Engenharia
 
-| Skill                               | What it does                                                                                                                                |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`spec`](./spec/SKILL.md)           | Guides you through a 4-phase spec-driven design session and saves the result to `specs/NN-slug.md`.                                         |
-| [`spec-impl`](./spec-impl/SKILL.md) | Implements an `Approved` spec (in any language) step by step on a `spec-NN-slug` branch, pausing for diff review. Never commits on its own. |
+| Skill                                                                   | O que faz                                                                                                                                                                       |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`spec`](./spec/SKILL.md)                                               | Guia você por uma sessão de design guiado por spec em 4 fases e salva o resultado em `specs/NN-slug.md`.                                                                        |
+| [`spec-impl`](./spec-impl/SKILL.md)                                     | Implementa uma spec `Aprovada` (em qualquer idioma) passo a passo em uma branch `spec-NN-slug`, com pausas para revisar o diff. Nunca faz commit por conta própria.             |
+| [`nextjs-feature-architecture`](./nextjs-feature-architecture/SKILL.md) | Padrão de arquitetura para features Next.js (App Router): camadas `http/` → `actions/` → `hooks/` → `components/`, Server Actions, React Query, MUI e os critérios de "pronto". |
+| [`unit-testing-standards`](./unit-testing-standards/SKILL.md)           | Exige teste automatizado para todo código com comportamento, em qualquer stack (front, back, worker, CLI). Traz o script e o hook da trava determinística.                      |

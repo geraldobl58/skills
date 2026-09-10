@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Symlinks every SKILL.md folder in this repo into ~/.claude/skills,
-# so Claude Code can load them as user-level skills.
+# Cria links simbólicos de todas as pastas com SKILL.md deste repositório
+# em ~/.claude/skills, para o Claude Code carregá-las como skills de usuário.
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 DEST="$HOME/.claude/skills"
@@ -11,8 +11,8 @@ if [ -L "$DEST" ]; then
   resolved="$(readlink -f "$DEST" 2>/dev/null || readlink "$DEST")"
   case "$resolved" in
     "$REPO"|"$REPO"/*)
-      echo "error: $DEST is a symlink into this repo ($resolved)." >&2
-      echo "Remove it (rm \"$DEST\") and re-run." >&2
+      echo "erro: $DEST é um link simbólico para dentro deste repositório ($resolved)." >&2
+      echo "Remova-o (rm \"$DEST\") e rode de novo." >&2
       exit 1
       ;;
   esac
@@ -31,5 +31,5 @@ while IFS= read -r -d '' skill_md; do
   fi
 
   ln -sfn "$src" "$target"
-  echo "linked $name -> $src"
+  echo "link criado: $name -> $src"
 done

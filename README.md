@@ -1,16 +1,16 @@
 <p align="center">
-  <h1 align="center">Spec-Driven Skills for Claude Code</h1>
-  <p align="center">Plan the feature. Approve it. Implement it step by step.</p>
+  <h1 align="center">Skills de Engenharia para Agentes de Código</h1>
+  <p align="center">Planeje a feature. Aprove. Implemente passo a passo — e escreva no padrão.</p>
 </p>
 
 <p align="center">
   <img alt="License" src="https://img.shields.io/github/license/geraldobl58/skills">
   <img alt="Latest Release" src="https://img.shields.io/github/v/release/geraldobl58/skills">
   <img alt="GitHub Stars" src="https://img.shields.io/github/stars/geraldobl58/skills?style=social">
-  <img alt="Skills" src="https://img.shields.io/badge/skills-2-blue">
+  <img alt="Skills" src="https://img.shields.io/badge/skills-4-blue">
 </p>
 
-## Quick start
+## Início rápido
 
 ```bash
 npx skills@latest add geraldobl58/skills
@@ -18,360 +18,463 @@ npx skills@latest add geraldobl58/skills
 
 ## Skills
 
-| Skill        | Description                                                 | Argument    |
-| ------------ | ----------------------------------------------------------- | ----------- |
-| `/spec`      | Designs the feature document by asking clarifying questions | —           |
-| `/spec-impl` | Validates the spec is approved and implements step by step  | `<NN-slug>` |
+**Fluxo de trabalho** — você invoca quando precisa:
+
+| Skill        | Descrição                                                        | Argumento   |
+| ------------ | ---------------------------------------------------------------- | ----------- |
+| `/spec`      | Desenha o documento da feature fazendo perguntas de clarificação | —           |
+| `/spec-impl` | Valida que a spec está aprovada e implementa passo a passo       | `<NN-slug>` |
+
+**Padrões de stack** — o agente carrega sozinho quando o assunto aparece (ver [Padrões de stack](#padrões-de-stack)):
+
+| Skill                          | Padrão                                                             |
+| ------------------------------ | ------------------------------------------------------------------ |
+| `/nextjs-feature-architecture` | Features Next.js em camadas, com ky, Zod, React Query e MUI.       |
+| `/unit-testing-standards`      | Nenhum código com comportamento sai sem teste — em qualquer stack. |
 
 ---
 
-## Table of contents
+## Índice
 
-- [What spec-driven design is](#what-spec-driven-design-is)
-- [The problem it solves](#the-problem-it-solves)
-- [The six-step procedure](#the-six-step-procedure)
-- [Anatomy of a useful spec](#anatomy-of-a-useful-spec)
-- [When to use specs and when not](#when-to-use-specs-and-when-not)
-- [Rules almost nobody follows](#rules-almost-nobody-follows)
-- [Installation](#installation)
-- [Usage](#usage)
-
----
-
-## What spec-driven design is
-
-Spec-driven design is an approach where **the spec is the main work artifact, not the code**. The code is the consequence.
-
-It sounds obvious. The difference from the classic "document before coding" is that in spec-driven the spec **is not optional or decorative**: it's the contract that guides execution, it's versioned in git, and it's kept alive. If the code diverges from the spec, one of the two is wrong.
-
-Each spec captures the decisions of a single feature. Specs live in `specs/` as `.md` files numbered sequentially, and they form the project's design decision log.
+- [O que é design guiado por spec](#o-que-é-design-guiado-por-spec)
+- [O problema que ele resolve](#o-problema-que-ele-resolve)
+- [O procedimento de seis passos](#o-procedimento-de-seis-passos)
+- [Anatomia de uma spec útil](#anatomia-de-uma-spec-útil)
+- [Quando usar specs e quando não](#quando-usar-specs-e-quando-não)
+- [Regras que quase ninguém segue](#regras-que-quase-ninguém-segue)
+- [Instalação](#instalação)
+- [Uso](#uso)
+- [Padrões de stack](#padrões-de-stack)
 
 ---
 
-## The problem it solves
+## O que é design guiado por spec
 
-When you work with an LLM like Claude Code, there's a very concrete phenomenon: if you ask it _"build me an Arkanoid with power-ups and levels"_, **it's going to improvise**. It's going to make 50 implicit design decisions (classes or functions? global or local state? how are entities named?) without you seeing any of them. And each one of those decisions becomes an expensive coupling to revert later.
+Design guiado por spec é uma abordagem em que **a spec é o artefato principal do trabalho, não o código**. O código é a consequência.
 
-The problem isn't new — humans improvise too — but with an LLM it's sharper:
+Parece óbvio. A diferença em relação ao clássico "documentar antes de codar" é que aqui a spec **não é opcional nem decorativa**: ela é o contrato que guia a execução, é versionada no git e é mantida viva. Se o código diverge da spec, um dos dois está errado.
 
-1. **Generation speed hides the cost of decisions.** When a human takes two hours to write a module, they have time to think. When Claude does it in 30 seconds, the decisions go invisible.
-2. **Every conversation starts from scratch.** Without a spec, in the next session Claude doesn't know what you decided before and is going to improvise again, possibly in the opposite direction.
-3. **Context fills up fast.** Without a stable document to refer to, you end up pasting context by hand into every prompt.
-
-The spec solves all three: it makes decisions explicit, it persists across sessions, and it loads once as a reference.
+Cada spec captura as decisões de uma única feature. As specs ficam em `specs/` como arquivos `.md` numerados sequencialmente, e formam o log de decisões de design do projeto.
 
 ---
 
-## The six-step procedure
+## O problema que ele resolve
+
+Quando você trabalha com um LLM como o Claude Code, existe um fenômeno bem concreto: se você pedir _"me faça um Arkanoid com power-ups e fases"_, **ele vai improvisar**. Vai tomar 50 decisões de design implícitas (classes ou funções? estado global ou local? como as entidades são nomeadas?) sem que você veja nenhuma delas. E cada uma dessas decisões se torna um acoplamento caro de reverter depois.
+
+O problema não é novo — humanos também improvisam — mas com um LLM ele é mais agudo:
+
+1. **A velocidade de geração esconde o custo das decisões.** Quando um humano leva duas horas para escrever um módulo, ele tem tempo de pensar. Quando o Claude faz em 30 segundos, as decisões ficam invisíveis.
+2. **Toda conversa começa do zero.** Sem uma spec, na sessão seguinte o Claude não sabe o que você decidiu antes e vai improvisar de novo, possivelmente na direção oposta.
+3. **O contexto enche rápido.** Sem um documento estável para consultar, você acaba colando contexto à mão em cada prompt.
+
+A spec resolve os três: torna as decisões explícitas, persiste entre sessões e carrega de uma vez como referência.
+
+---
+
+## O procedimento de seis passos
 
 ```
 ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
-│   1. DESCRIBE   │→ │  2. PLAN MODE   │→ │   3. REFINE     │
-│   the problem   │  │ Claude proposes │  │ You give        │
-│  not the answer │  │ doesn't edit    │  │ decisions       │
+│  1. DESCREVA    │→ │  2. PLANO       │→ │   3. AJUSTE     │
+│  o problema     │  │ Claude propõe   │  │ você dá         │
+│  não a resposta │  │ não edita       │  │ as decisões     │
 └─────────────────┘  └─────────────────┘  └─────────────────┘
         ↑                                          │
         │                                          │
-        └──────── 2-3 iterations until converged ──┘
+        └──────── 2-3 iterações até convergir ──────┘
                               │
                               ▼
 ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
-│    4. SAVE      │→ │   5. EXECUTE    │→ │   6. REVIEW     │
-│ specs/NN-       │  │ Step by step    │  │ Diff per step   │
-│ feature.md      │  │ with pauses     │  │ not at the end  │
+│    4. SALVE     │→ │   5. EXECUTE    │→ │   6. REVISE     │
+│ specs/NN-       │  │ passo a passo   │  │ diff por passo  │
+│ feature.md      │  │ com pausas      │  │ não no final    │
 └─────────────────┘  └─────────────────┘  └─────────────────┘
 ```
 
-### 1. Describe
+### 1. Descreva
 
-You describe the feature to Claude in terms of **the problem**, not the solution. If you dictate the solution, Claude just formats it — you lose its ability to propose structure.
+Você descreve a feature ao Claude em termos **do problema**, não da solução. Se você dita a solução, o Claude só formata — você perde a capacidade dele de propor estrutura.
 
-### 2. Plan mode
+### 2. Modo plano
 
-You activate plan mode (in plan mode Claude can't write files, only read and propose). Claude responds with a structured document: scope, data model, implementation plan, and acceptance criteria.
+Você ativa o modo plano (no modo plano o Claude não pode escrever arquivos, só ler e propor). O Claude responde com um documento estruturado: escopo, modelo de dados, plano de implementação e critérios de aceite.
 
-### 3. Refine
+### 3. Ajuste
 
-You read the plan with resistance and give **concrete decisions**. "Take X out of scope", "data lives in JSON, not in JS modules", "add a risks section". You iterate 2-3 times.
+Você lê o plano com resistência e dá **decisões concretas**. "Tira X do escopo", "os dados vivem em JSON, não em módulos JS", "adiciona uma seção de riscos". Você itera 2-3 vezes.
 
-### 4. Save
+### 4. Salve
 
-When the spec is honed, you save it in `specs/NN-slug.md` with status `Draft`. You leave the chat, **re-read it outside the editor**, and only when you're satisfied do you change the status to `Approved` manually. That change is made by the human, not Claude.
+Quando a spec está afiada, você a salva em `specs/NN-slug.md` com status `Rascunho`. Você sai do chat, **relê fora do editor** e só quando está satisfeito muda o status para `Aprovado` na mão. Essa mudança é feita pelo humano, não pelo Claude.
 
 ### 5. Execute
 
-You exit plan mode and ask Claude to implement the spec **step by step**, stopping after each step in the implementation plan. The pause between steps is what makes the method work.
+Você sai do modo plano e pede ao Claude para implementar a spec **passo a passo**, parando depois de cada passo do plano de implementação. A pausa entre os passos é o que faz o método funcionar.
 
-### 6. Review
+### 6. Revise
 
-After each step, you review the diff. If it's good, you continue. If not, you correct in the moment — not at the end with 600 lines mixed together.
-
----
-
-## Anatomy of a useful spec
-
-Not every document does the job. A useful spec has six parts — if any of them is missing, it's probably not enough to guide execution.
-
-### 1. Goal in one sentence
-
-If it doesn't fit in a sentence, the feature is too big. Split it before writing anything else.
-
-### 2. Explicit scope + what's NOT in scope
-
-The "out of scope" is as important as the "in scope". Without it, the boundaries are blurry and scope creep appears during implementation. Capture the things that were mentioned but decided to postpone.
-
-### 3. Data model
-
-Concrete structures and names. If you say "the levels module", say `src/levels.js`. If you say "a key", give the exact string. This section is the one most cited later in other specs and skills.
-
-### 4. Ordered implementation plan
-
-Numbered sequential steps. **Each step must leave the system in a working state.** If a step requires more than 30-50 lines of code, split it. The last step is not "test everything" — that's the acceptance criteria.
-
-### 5. Acceptance criteria
-
-A verifiable boolean checklist. Each item can be answered yes or no.
-
-- ❌ "Works well" — not verifiable
-- ❌ "Good UX" — subjective
-- ❌ "No bugs" — not operational
-- ✅ "Pressing Esc pauses the game and shows the menu" — verifiable
-
-### 6. Decisions made and discarded
-
-What you considered and why you chose what you chose. **This is gold three months from now** when someone asks _"why does persistence use a versioned key?"_. The answer lives there.
-
-Each decision ideally has a short reason. Decisions without a reason are the first ones questioned later.
+Depois de cada passo, você revisa o diff. Se estiver bom, você continua. Se não, você corrige na hora — não no final com 600 linhas misturadas.
 
 ---
 
-## When to use specs and when not
+## Anatomia de uma spec útil
 
-This architecture has a cost. Don't apply it to everything.
+Nem todo documento dá conta do recado. Uma spec útil tem seis partes — se faltar alguma, provavelmente não é o suficiente para guiar a execução.
 
-### YES — write a spec when:
+### 1. Objetivo em uma frase
 
-- The task will touch **more than two files**.
-- There are **decisions expensive to revert** (data schemas, formats, APIs).
-- The feature will take **more than one session** of Claude Code.
-- There's a **contract that other artifacts will reuse** (another spec, a skill, a hook).
-- It's something you'll **forget about in a week**.
+Se não cabe em uma frase, a feature é grande demais. Divida antes de escrever qualquer outra coisa.
 
-### NO — use a direct prompt when:
+### 2. Escopo explícito + o que NÃO está no escopo
 
-- It's a **point bug fix**.
-- It's a **mechanical refactor** (renames, file moves).
-- It's an **exploratory experiment** where the goal is to discover the decision, not execute it.
-- The task **fits in a prompt** and is understood at first read.
-- It's a **one-off task** that won't be repeated.
+O "fora do escopo" é tão importante quanto o "dentro do escopo". Sem ele, as fronteiras ficam borradas e o scope creep aparece durante a implementação. Registre as coisas que foram mencionadas mas decididas adiar.
 
-### Mental rule
+### 3. Modelo de dados
 
-> **If you're tempted to open plan mode, you probably need it.** > **If planning the feature bores you, you probably don't.**
+Estruturas e nomes concretos. Se você diz "o módulo de fases", diga `src/levels.js`. Se você diz "uma chave", dê a string exata. Esta seção é a mais citada depois em outras specs e skills.
 
-Common sense beats the rule — but common sense is trained by the two columns above.
+### 4. Plano de implementação ordenado
 
----
+Passos numerados e sequenciais. **Cada passo deve deixar o sistema em estado funcional.** Se um passo exige mais de 30-50 linhas de código, divida. O último passo não é "testar tudo" — isso são os critérios de aceite.
 
-## Rules almost nobody follows
+### 5. Critérios de aceite
 
-Four usage patterns that distinguish the method working well from the method as decorative bureaucracy:
+Um checklist booleano verificável. Cada item pode ser respondido com sim ou não.
 
-### 1. In the description phase, describe the problem, not the solution
+- ❌ "Funciona bem" — não é verificável
+- ❌ "Boa UX" — subjetivo
+- ❌ "Sem bugs" — não é operacional
+- ✅ "Apertar Esc pausa o jogo e mostra o menu" — verificável
 
-❌ _"Add an array of levels loaded from JSON, a `loadLevel()` function, and persistence with versioned localStorage."_
+### 6. Decisões tomadas e descartadas
 
-That's already a spec poorly written by you. Claude is just going to format it.
+O que você considerou e por que escolheu o que escolheu. **Isso é ouro daqui a três meses**, quando alguém perguntar _"por que a persistência usa uma chave versionada?"_. A resposta mora ali.
 
-✅ _"I want the game to stop being single-screen. The next feature is: progression through levels with increasing difficulty, and persistence of high scores across sessions."_
-
-That second version leaves room for Claude to **decide** and you to **review**. That's the nature of the flow.
-
-### 2. In the refine phase, give concrete decisions, not suggestions
-
-Plan mode is where **you direct**. "Take X out", "the format is JSON", "add risks". If you say "I think maybe it would be good to...", Claude is going to leave it as is.
-
-### 3. During execution, ask for pauses between steps
-
-The difference is:
-
-- **Without pauses:** Claude dumps 400 lines. You review a giant commit. If something is wrong in step 2, it's mixed with changes from steps 5 and 6. Painful.
-- **With pauses:** Claude dumps 50-80 lines (step 1). You read the diff. You approve or adjust. It moves to step 2. Each step is a clean commit. Reverting is trivial.
-
-### 4. If mid-execution you want to change something, you go back to step 2 — never improvise
-
-Mid-implementation something occurs to you. The right move is: stop, go back to plan mode, update the spec, exit, continue. **Don't improvise on the code.**
-
-That separation is what prevents silent scope creep.
+Idealmente cada decisão tem uma razão curta. Decisões sem razão são as primeiras a serem questionadas depois.
 
 ---
 
-## Installation
+## Quando usar specs e quando não
 
-### Option 1 — skills.sh (recommended, Claude Code)
+Essa arquitetura tem um custo. Não aplique a tudo.
+
+### SIM — escreva uma spec quando:
+
+- A tarefa tocar **mais de dois arquivos**.
+- Existirem **decisões caras de reverter** (schemas de dados, formatos, APIs).
+- A feature levar **mais de uma sessão** de Claude Code.
+- Existir um **contrato que outros artefatos vão reutilizar** (outra spec, uma skill, um hook).
+- For algo que você vai **esquecer em uma semana**.
+
+### NÃO — use um prompt direto quando:
+
+- For uma **correção pontual de bug**.
+- For um **refactor mecânico** (renames, movimentação de arquivos).
+- For um **experimento exploratório** em que o objetivo é descobrir a decisão, não executá-la.
+- A tarefa **caber em um prompt** e for entendida na primeira leitura.
+- For uma **tarefa pontual** que não vai se repetir.
+
+### Regra mental
+
+> **Se você está com vontade de abrir o modo plano, provavelmente você precisa dele.**
+> **Se planejar a feature te dá tédio, provavelmente você não precisa.**
+
+Bom senso vence a regra — mas o bom senso é treinado pelas duas colunas acima.
+
+---
+
+## Regras que quase ninguém segue
+
+Quatro padrões de uso que distinguem o método funcionando do método como burocracia decorativa:
+
+### 1. Na fase de descrição, descreva o problema, não a solução
+
+❌ _"Adicione um array de fases carregado de JSON, uma função `loadLevel()` e persistência com localStorage versionado."_
+
+Isso já é uma spec mal escrita por você. O Claude só vai formatar.
+
+✅ _"Quero que o jogo deixe de ser de tela única. A próxima feature é: progressão por fases com dificuldade crescente, e persistência de recordes entre sessões."_
+
+Essa segunda versão deixa espaço para o Claude **decidir** e para você **revisar**. É a natureza do fluxo.
+
+### 2. Na fase de ajuste, dê decisões concretas, não sugestões
+
+O modo plano é onde **você dirige**. "Tira X", "o formato é JSON", "adiciona riscos". Se você disser "acho que talvez seria bom se...", o Claude vai deixar como está.
+
+### 3. Durante a execução, peça pausas entre os passos
+
+A diferença é:
+
+- **Sem pausas:** o Claude despeja 400 linhas. Você revisa um commit gigante. Se algo está errado no passo 2, está misturado com mudanças dos passos 5 e 6. Doloroso.
+- **Com pausas:** o Claude despeja 50-80 linhas (passo 1). Você lê o diff. Você aprova ou ajusta. Ele vai para o passo 2. Cada passo é um commit limpo. Reverter é trivial.
+
+### 4. Se no meio da execução você quiser mudar algo, volte ao passo 2 — nunca improvise
+
+No meio da implementação surge uma ideia. O movimento certo é: pare, volte ao modo plano, atualize a spec, saia, continue. **Não improvise no código.**
+
+Essa separação é o que evita scope creep silencioso.
+
+---
+
+## Instalação
+
+### Opção 1 — skills.sh (recomendada, Claude Code)
 
 ```bash
 npx skills@latest add geraldobl58/skills
 ```
 
-To uninstall:
+Para desinstalar:
 
 ```bash
 npx skills@latest remove geraldobl58/skills
 ```
 
-### Option 2 — Other agents (Cursor, Codex, Antigravity)
+### Opção 2 — Outros agentes (Cursor, Codex, Antigravity)
 
 ```bash
 git clone https://github.com/geraldobl58/skills ~/.skills
-cd ~/your-project
+cd ~/seu-projeto
 ~/.skills/scripts/install-to-agent.sh <agent>
 ```
 
-`<agent>` can be `claude`, `cursor`, `codex`, or `antigravity`.
+`<agent>` pode ser `claude`, `cursor`, `codex` ou `antigravity`.
 
-| Agent         | What gets written                                                                     |
-| ------------- | ------------------------------------------------------------------------------------- |
-| `claude`      | Symlinks each skill into `.claude/skills/` (project-scoped)                           |
-| `cursor`      | Generates `.cursor/rules/<name>.mdc` files. Invoke with `@spec`, `@spec-impl`, etc.   |
-| `codex`       | Adds a `## Skills` block to `AGENTS.md` and copies skill bodies into `.codex/skills/` |
-| `antigravity` | Copies skill bodies into `.antigravity/skills/`                                       |
+| Agente        | O que é escrito                                                                                 |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| `claude`      | Cria links simbólicos de cada skill em `.claude/skills/` (escopo do projeto)                    |
+| `cursor`      | Gera arquivos `.cursor/rules/<name>.mdc`. Invoque com `@spec`, `@spec-impl`, etc.               |
+| `codex`       | Adiciona um bloco `## Skills` ao `AGENTS.md` e copia os corpos das skills para `.codex/skills/` |
+| `antigravity` | Copia os corpos das skills para `.antigravity/skills/`                                          |
 
-> Cursor and Codex don't natively support Claude Code's `argument-hint` or `disable-model-invocation` frontmatter. The installer drops those fields and keeps the body — the workflow is the same, only the trigger changes.
+> Cursor e Codex não suportam nativamente o `argument-hint` nem o `disable-model-invocation` do frontmatter do Claude Code. O instalador descarta esses campos e mantém o corpo — o fluxo é o mesmo, só o gatilho muda.
 
-### Option 3 — Manual
+### Opção 3 — Manual
 
 ```bash
-# Personal (all your projects)
+# Pessoal (todos os seus projetos)
 mkdir -p ~/.claude/skills
 cp -r skills/engineering/spec ~/.claude/skills/
 cp -r skills/engineering/spec-impl ~/.claude/skills/
 
-# Or per-project (versioned in git)
+# Ou por projeto (versionado no git)
 mkdir -p .claude/skills
 cp -r skills/engineering/spec .claude/skills/
 cp -r skills/engineering/spec-impl .claude/skills/
 ```
 
-For the method to work, you also need to create the `specs/` folder at the project root:
+Para o método funcionar, você também precisa criar a pasta `specs/` na raiz do projeto:
 
 ```bash
 mkdir specs
 ```
 
-Optionally, add a `specs/README.md` documenting the convention (see the example in this repo).
+Opcionalmente, adicione um `specs/README.md` documentando a convenção (veja o exemplo neste repositório).
 
 ---
 
-## Usage
+## Uso
 
-### Full feature cycle
+### Ciclo completo de uma feature
 
 ```bash
-# 1. Design the spec with clarifying questions
+# 1. Desenhe a spec com perguntas de clarificação
 /spec levels-and-highscores
 
-# Claude reads the project-memory file (CLAUDE.md, AGENTS.md, GEMINI.md, or README.md) and existing specs/, asks questions
-# in blocks, develops the spec section by section,
-# and finally saves it as specs/03-levels-and-highscores.md
-# with status: Draft.
+# O Claude lê o arquivo de memória do projeto (CLAUDE.md, AGENTS.md, GEMINI.md ou README.md) e as specs existentes em specs/, faz perguntas
+# em blocos, desenvolve a spec seção por seção,
+# e no final salva como specs/03-levels-and-highscores.md
+# com status: Rascunho.
 
-# 2. Re-read the spec outside the chat and approve it manually
-# (open the file in the editor, change Status: Draft → Approved)
+# 2. Releia a spec fora do chat e aprove na mão
+# (abra o arquivo no editor, mude Status: Rascunho → Aprovado)
 
-# 3. Implement the approved spec
+# 3. Implemente a spec aprovada
 /spec-impl 03-levels-and-highscores
 
-# Claude validates the status is Approved, creates the branch
-# spec-03-levels-and-highscores, switches to it, shows
-# the spec summary, and starts the step-by-step implementation
-# with pauses to review diffs.
+# O Claude valida que o status é Aprovado, cria a branch
+# spec-03-levels-and-highscores, muda para ela, mostra
+# o resumo da spec, e começa a implementação passo a passo
+# com pausas para revisar os diffs.
 ```
 
-### What each skill does
+### O que cada skill faz
 
-#### `/spec [short-topic]`
+#### `/spec [tópico-curto]`
 
-Designs the feature document. Goes through four phases:
+Desenha o documento da feature. Passa por quatro fases:
 
-1. **Context** — reads the project-memory file (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, or `README.md`, whichever exists first) and previous specs.
-2. **Clarification** — asks questions in blocks of 3-5 until the feature is clearly defined.
-3. **Section by section development** — generates and confirms each spec section before moving on.
-4. **Save** — writes the file in `specs/NN-slug.md` with status `Draft`.
+1. **Contexto** — lê o arquivo de memória do projeto (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md` ou `README.md`, o primeiro que existir) e as specs anteriores.
+2. **Clarificação** — faz perguntas em blocos de 3-5 até a feature estar claramente definida.
+3. **Desenvolvimento seção por seção** — gera e confirma cada seção da spec antes de seguir.
+4. **Salvar** — escreve o arquivo em `specs/NN-slug.md` com status `Rascunho`.
 
-#### `/spec-impl <NN-name>`
+#### `/spec-impl <NN-nome>`
 
-Implements an approved spec. Goes through four phases:
+Implementa uma spec aprovada. Passa por quatro fases:
 
-1. **Identify** — locates the spec file.
-2. **Validate** — verifies the status is `Approved`. If not, it stops.
-3. **Create branch** — `git checkout -b spec-NN-slug` and switches to it.
-4. **Implement** — step by step with pauses, showing the spec summary first.
+1. **Identificar** — localiza o arquivo da spec.
+2. **Validar** — verifica se o status é `Aprovado`. Se não for, para.
+3. **Criar branch** — `git checkout -b spec-NN-slug` e muda para ela.
+4. **Implementar** — passo a passo com pausas, mostrando o resumo da spec primeiro.
 
-> **Branch control:** Phase 3 reads the `AutoCreateBranch` flag from `specs/.spec-config.yml`. It defaults to `true` (creates the branch automatically). Set it to `false` to make `/spec-impl` ask `[y/N]` before creating any branch — useful if branch naming is part of your own Git workflow.
+> **Controle de branch:** a Fase 3 lê a flag `AutoCreateBranch` de `specs/.spec-config.yml`. O padrão é `true` (cria a branch automaticamente). Defina `false` para o `/spec-impl` perguntar `[y/N]` antes de criar qualquer branch — útil se a nomenclatura de branches faz parte do seu próprio fluxo de Git.
 >
 > ```yaml
 > # specs/.spec-config.yml
 > AutoCreateBranch: false
 > ```
 
-### Spec states
+### Estados da spec
 
-| State         | Meaning                                                                    |
-| ------------- | -------------------------------------------------------------------------- |
-| `Draft`       | The `/spec` skill generated it but the human hasn't re-read it.            |
-| `In review`   | The human is reviewing or iterating with Claude.                           |
-| `Approved`    | The human read and authorized it. `/spec-impl` only works with this state. |
-| `Implemented` | The code exists and passes the acceptance criteria.                        |
-| `Obsolete`    | Replaced by another spec. Not deleted — referenced.                        |
+| Estado         | Significado                                                           |
+| -------------- | --------------------------------------------------------------------- |
+| `Rascunho`     | A skill `/spec` gerou a spec, mas o humano ainda não releu.           |
+| `Em revisão`   | O humano está revisando ou iterando com o Claude.                     |
+| `Aprovado`     | O humano leu e autorizou. O `/spec-impl` só funciona com este estado. |
+| `Implementado` | O código existe e passa nos critérios de aceite.                      |
+| `Obsoleto`     | Substituída por outra spec. Não é apagada — é referenciada.           |
 
-**Changing the status to `Approved` is a deliberate human act.** It's the only signature on the contract — Claude can't approve its own work.
+**Mudar o status para `Aprovado` é um ato humano deliberado.** É a única assinatura no contrato — o Claude não pode aprovar o próprio trabalho.
 
-> Status labels are language-agnostic. `/spec-impl` only requires the status to mean **Approved** — `Approved`, `Aprobado`, or the equivalent in any language all work. Same goes for the other states. Pick the labels your team prefers and stay consistent.
+> Os rótulos de status são agnósticos de idioma. O `/spec-impl` só exige que o status signifique **Aprovado** — `Aprovado`, `Approved` ou o equivalente em qualquer idioma funcionam. O mesmo vale para os outros estados. Escolha os rótulos que seu time preferir e mantenha a consistência.
 
 ---
 
-## Why the two skills work as a pair
+## Padrões de stack
+
+Skills de fluxo (`/spec`, `/spec-impl`) servem para **conduzir um trabalho**. Skills de padrão servem para **definir como o código deve ser escrito** — não têm fases nem fim, são conhecimento que o agente carrega quando o assunto aparece.
+
+| Skill                                                                                      | Padrão                                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`nextjs-feature-architecture`](./skills/engineering/nextjs-feature-architecture/SKILL.md) | Features Next.js em camadas: estrutura de pastas, `http/` → `actions/` → `hooks/` → `components/`, Server Actions, React Query, MUI e uma Definition of Done com 6 critérios.                    |
+| [`unit-testing-standards`](./skills/engineering/unit-testing-standards/SKILL.md)           | Teste obrigatório para todo código com comportamento, em qualquer stack (front, back, worker, CLI). É a única skill que traz **código executável**: o script da trava e o hook de fim de sessão. |
+
+### Como usar
+
+Não há comando a decorar:
+
+- **Automático** — peça _"crie a feature de faturamento em `src/features`"_ e o agente carrega a skill sozinho, porque a `description` dela casa com a tarefa.
+- **Explícito** — digite `/nextjs-feature-architecture` para trazer as regras para a conversa e trabalhar a partir delas.
+- **Como checklist de review** — peça _"revise essa feature contra a nextjs-feature-architecture"_. A seção 6 dela é uma Definition of Done com critérios verificáveis (zero lógica nos componentes, tipagem centralizada, um arquivo por operação, erros tratados, testes, sem proxy de API).
+- **Como trava de verdade** — a `unit-testing-standards` passa do texto: ela traz o script `check-test-pairs.sh` e um hook de fim de sessão que **bloqueiam** a entrega enquanto houver arquivo de código sem teste irmão. Regra em Markdown orienta; script e hook garantem. A instalação está logo abaixo.
+
+É esse terceiro uso que faz a skill valer a pena no dia a dia: ela vira um critério objetivo de revisão, em vez de "achei que ficou bom".
+
+### Como ativar a trava de testes (uma vez por projeto)
+
+A `unit-testing-standards` só bloqueia alguma coisa depois que o script e o hook estão **no projeto de destino** — a skill sozinha apenas orienta. São três passos, uma vez por projeto.
+
+**1. Copiar a trava**
+
+```bash
+mkdir -p .github/hooks
+cp <pasta-da-skill>/scripts/check-test-pairs.sh .github/hooks/
+cp <pasta-da-skill>/hooks/verify-tests.json .github/hooks/
+chmod +x .github/hooks/check-test-pairs.sh
+```
+
+`<pasta-da-skill>` é onde a skill ficou instalada: `~/.claude/skills/unit-testing-standards`, `.claude/skills/unit-testing-standards` ou o repositório clonado em `~/.skills/skills/engineering/unit-testing-standards`.
+
+> **No Cursor** o instalador copia apenas o corpo da skill para `.cursor/rules/`. Os dois arquivos acima vêm do repositório clonado.
+
+**2. Conferir que está funcionando**
+
+```bash
+bash .github/hooks/check-test-pairs.sh   # 0 = tudo coberto, 2 = falta teste
+```
+
+O script roda dentro de um repositório git e olha o que está modificado ou novo. Se ele acusar um arquivo que é isento por natureza, marque nas primeiras linhas dele:
+
+```ts
+// test-ignore: DTO sem comportamento
+```
+
+A exceção fica visível no diff, para alguém revisar — em vez de escondida na configuração do script.
+
+**3. Fechar no CI (a autoridade final)**
+
+```yaml
+- uses: actions/checkout@v4
+  with:
+    fetch-depth: 0 # a trava precisa do histórico para achar o merge-base
+
+- name: Testes obrigatórios
+  run: |
+    bash .github/hooks/check-test-pairs.sh --base origin/${{ github.base_ref }}
+    npm test        # troque pelo comando do projeto: go test ./..., pytest, ./gradlew test
+```
+
+O hook local impede o agente de encerrar sem teste; o CI é o que vale para um commit feito à mão, fora do editor. Sem esse passo, a garantia existe só na sua máquina.
+
+Com clone raso (`fetch-depth: 1`, o padrão do checkout) o script sai com `1` em vez de passar em silêncio — de propósito: uma trava mal configurada que passa dá falsa sensação de cobertura.
+
+### Como encaixar a próxima (backend, mobile, …)
+
+Não existe registro nem configuração: **criar a pasta é o suficiente**. O `skills.sh` e o `scripts/install-to-agent.sh` descobrem qualquer `skills/**/SKILL.md` automaticamente.
+
+```text
+skills/engineering/
+├── nextjs-feature-architecture/   # padrão do frontend
+├── unit-testing-standards/        # regra transversal (serve front e back)
+├── nestjs-api-architecture/       # <- o padrão do backend entraria aqui
+├── spec/
+└── spec-impl/
+```
+
+O bucket `engineering/` agrupa por **domínio**, não por stack — frontend, backend e infraestrutura convivem nele. Um padrão novo entra como pasta irmã, com `name` igual ao nome da pasta, `description` em português dizendo quando usar, e o corpo com as regras. Depois é só adicionar a linha na tabela do [`skills/engineering/README.md`](./skills/engineering/README.md).
+
+Duas convenções que valem para qualquer skill nova:
+
+- **Skill de fluxo** (fases, um fim determinado) leva `disable-model-invocation: true` — só roda quando você chama. Repita essa intenção no corpo (`> **Invocação explícita.**`), porque o frontmatter não sobrevive ao instalador no Cursor/Codex/Antigravity.
+- **Skill de padrão** **não** leva esse campo: o objetivo é o agente carregá-la sozinho quando o assunto aparecer.
+
+E uma que vale para qualquer skill que **gere código** (padrão de stack ou fluxo): ela aponta para a `unit-testing-standards` e exige o teste na sua Definition of Done. Nada é entregue sem teste — é regra do repositório, não preferência de stack.
+
+---
+
+## Por que as duas skills funcionam como um par
 
 ```
 ┌───────────────────────────────────────────────────────────┐
 │                                                           │
-│   /spec     Claude asks and designs                       │
+│   /spec     Claude pergunta e desenha                     │
 │             ↓                                             │
-│             specs/NN-slug.md  (Status: Draft)             │
+│             specs/NN-slug.md  (Status: Rascunho)          │
 │                                                           │
-│   ──────── human re-reads and approves ────────           │
+│   ──────── o humano relê e aprova ────────                │
 │             ↓                                             │
-│             specs/NN-slug.md  (Status: Approved)          │
+│             specs/NN-slug.md  (Status: Aprovado)          │
 │                                                           │
-│   /spec-impl  Claude validates and implements             │
+│   /spec-impl  Claude valida e implementa                  │
 │             ↓                                             │
-│             branch spec-NN-slug + code                    │
+│             branch spec-NN-slug + código                  │
 │                                                           │
 └───────────────────────────────────────────────────────────┘
 ```
 
-The gap between the two skills — re-reading and changing the status by hand — is deliberate. It's the only moment where **only you can do something**. Without that gap, the method degrades to "Claude writes pretty documentation and then writes whatever code occurs to it anyway".
+O intervalo entre as duas skills — reler e mudar o status na mão — é deliberado. É o único momento em que **só você pode fazer algo**. Sem esse intervalo, o método degrada para "o Claude escreve documentação bonita e depois escreve o código que der na telha".
 
 ---
 
 ## Releases
 
-This project uses [release-please](https://github.com/googleapis/release-please) for automated releases. Commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/):
+Este projeto usa [release-please](https://github.com/googleapis/release-please) para releases automatizadas. As mensagens de commit devem seguir o [Conventional Commits](https://www.conventionalcommits.org/):
 
-| Prefix                         | Effect              |
-| ------------------------------ | ------------------- |
-| `feat:`                        | Bumps minor version |
-| `fix:`                         | Bumps patch version |
-| `feat!:` / `fix!:`             | Bumps major version |
-| `docs:`, `chore:`, `refactor:` | No version bump     |
+| Prefixo                        | Efeito                |
+| ------------------------------ | --------------------- |
+| `feat:`                        | Sobe a versão minor   |
+| `fix:`                         | Sobe a versão patch   |
+| `feat!:` / `fix!:`             | Sobe a versão major   |
+| `docs:`, `chore:`, `refactor:` | Nenhum bump de versão |
 
 ---
 
-## License
+## Licença
 
 MIT
 
 ---
 
-_If you find a way to improve the method or the skills, open an issue or a PR. The most valuable part of a personal skill is that it evolves with use._
+_Se você encontrar uma forma de melhorar o método ou as skills, abra uma issue ou um PR. A parte mais valiosa de uma skill pessoal é que ela evolui com o uso._

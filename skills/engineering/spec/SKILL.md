@@ -1,164 +1,167 @@
 ---
 name: spec
-description: Designs and develops specs following the spec-driven method. Asks clarifying questions before proposing structure, and builds the spec section by section. Use it when starting a large feature, before writing code.
+description: Desenha e desenvolve specs seguindo o método guiado por spec. Faz perguntas de clarificação antes de propor estrutura, e constrói a spec seção por seção. Use ao iniciar uma feature grande, antes de escrever código.
 disable-model-invocation: true
-argument-hint: "short feature description or requirement"
+argument-hint: "descrição curta da feature ou requisito"
 allowed-tools: Read, Glob, Grep, Write, AskUserQuestion, Bash(ls:*), Bash(cat:*), Bash(date:*)
 ---
 
-# /spec — Guided spec designer
+# /spec — Desenhista de spec guiado
 
-## Session context
+## Contexto da sessão
 
-Today's date (use this for the spec header, never guess it):
+Data de hoje (use no cabeçalho da spec, nunca adivinhe):
 !`date +%F`
 
-Specs that already exist:
-!`ls specs/ 2>/dev/null || echo "The specs/ folder does not exist yet"`
+Specs que já existem:
+!`ls specs/ 2>/dev/null || echo "A pasta specs/ ainda não existe"`
 
 ---
 
-This skill helps you produce a useful spec following the spec-driven method. **You don't write code here.** Your job is to help the user clarify what they want to build, ask questions when something is not well-defined enough, and develop the spec section by section until it is ready to be saved into `specs/`.
+Esta skill ajuda você a produzir uma spec útil seguindo o método guiado por spec. **Você não escreve código aqui.** Seu trabalho é ajudar o usuário a clarificar o que ele quer construir, fazer perguntas quando algo não estiver definido o suficiente, e desenvolver a spec seção por seção até ela estar pronta para ser salva em `specs/`.
 
-## Philosophy
+> **Invocação explícita.** Esta skill só roda quando o usuário a chama (`/spec`). Ela conduz uma sessão de perguntas e escreve um arquivo — não a inicie por conta própria só porque a conversa mencionou uma feature nova. Se parecer o caso, sugira `/spec` e espere a decisão dele.
 
-A spec is not decorative documentation. It is the contract that drives later execution. If the spec is vague, the code will improvise. That is why this flow is **deliberately slow during the definition phase** and **fast during the writing phase**.
+## Filosofia
 
-Read `template.md` (in the same directory as this skill) to see the full structure the spec will follow. Lean on it at every step.
+Uma spec não é documentação decorativa. É o contrato que guia a execução posterior. Se a spec é vaga, o código improvisa. É por isso que este fluxo é **deliberadamente lento na fase de definição** e **rápido na fase de escrita**.
 
-## Command flow
+Leia `template.md` (no mesmo diretório desta skill) para ver a estrutura completa que a spec vai seguir. Apoie-se nele em cada passo.
 
-- Follow the four phases in order. **Never skip Phase 2** — the questions are the whole point. If the user wants to go faster, remind them that the cost of a bad spec gets paid later in code. (Phase 3 does have a fast path once Phase 2 is genuinely complete; see below.)
-- Your replies must be in the same language as the initial prompt. E.g.: if the initial prompt is in Spanish, your replies must be in Spanish; if it is in English, your replies must be in English.
+## Fluxo do comando
 
-### Phase 1 — Understand the context
+- Siga as quatro fases em ordem. **Nunca pule a Fase 2** — as perguntas são o ponto inteiro. Se o usuário quiser ir mais rápido, lembre que o custo de uma spec ruim é pago depois, no código. (A Fase 3 tem um caminho rápido quando a Fase 2 está genuinamente completa; veja abaixo.)
+- Suas respostas devem estar no mesmo idioma do prompt inicial. Ex.: se o prompt inicial está em espanhol, suas respostas devem estar em espanhol; se está em inglês, em inglês.
 
-Before asking questions about the feature, make sure you have project context:
+### Fase 1 — Entenda o contexto
 
-1. Read the project-memory file, if one exists. Try in order and stop at the first hit: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `README.md`. This adapts the skill to whichever agent is running it (Claude Code, Codex, Gemini CLI, etc.).
-2. Look at the `specs/` listing in the session context above to see which specs already exist and how they are numbered.
-3. If previous specs exist, read at least the two most recent ones to pick up the project's conventions — including the **language** they are written in and the exact wording they use for states and section headings. A new spec must match the existing ones.
+Antes de fazer perguntas sobre a feature, garanta que você tem contexto do projeto:
 
-If the `$ARGUMENTS` argument comes in empty, ask the user for an initial **single-sentence** description of what they want to build. If the description does not fit in one sentence, that is the first signal that the feature is too big — suggest splitting it before continuing.
+1. Leia o arquivo de memória do projeto, se existir. Tente na ordem e pare no primeiro que encontrar: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, `README.md`. Isso adapta a skill a qualquer agente que a esteja executando (Claude Code, Codex, Gemini CLI, etc.).
+2. Olhe a listagem de `specs/` no contexto da sessão acima para ver quais specs já existem e como estão numeradas.
+3. Se existirem specs anteriores, leia pelo menos as duas mais recentes para captar as convenções do projeto — incluindo o **idioma** em que estão escritas e a redação exata que usam para estados e títulos de seção. Uma spec nova precisa combinar com as existentes.
 
-### Phase 2 — Clarify through questions
+Se o argumento `$ARGUMENTS` vier vazio, peça ao usuário uma descrição inicial **de uma única frase** sobre o que ele quer construir. Se a descrição não couber em uma frase, esse é o primeiro sinal de que a feature é grande demais — sugira dividi-la antes de continuar.
 
-This is the most important phase of the command. Your job here is to **detect ambiguities and ask**, not to assume.
+### Fase 2 — Clarifique com perguntas
 
-Ask questions in blocks of 3 to 5 at a time (not one single question followed by another single question — that is exhausting). After each block, wait for an answer before continuing.
+Esta é a fase mais importante do comando. Seu trabalho aqui é **detectar ambiguidades e perguntar**, não supor.
 
-**Question categories you should always consider:**
+Faça perguntas em blocos de 3 a 5 por vez (não uma pergunta isolada seguida de outra pergunta isolada — isso é exaustivo). Depois de cada bloco, espere a resposta antes de continuar.
 
-- **Scope:** What is in and what is NOT? Which parts of the feature are deferred to another spec?
-- **Data:** What new structures are introduced? How are they named? Where do they live?
-- **Integration:** Does this feature depend on previous specs? Does it modify something existing or only add?
-- **Persistence:** Is anything saved between sessions? Where? With what versioning?
-- **UX and states:** What does it look like when it works? What does it look like when it fails? Are there intermediate states?
-- **Risks:** What can break this? What happens in the degraded case?
-- **Closed decisions:** Is there any decision the user has already made and does not want to reopen?
+**Categorias de pergunta que você deve sempre considerar:**
 
-**How to phrase the questions:**
+- **Escopo:** o que está dentro e o que NÃO está? Que partes da feature ficam adiadas para outra spec?
+- **Dados:** que estruturas novas são introduzidas? Como são nomeadas? Onde vivem?
+- **Integração:** esta feature depende de specs anteriores? Ela modifica algo existente ou apenas adiciona?
+- **Persistência:** algo é salvo entre sessões? Onde? Com qual versionamento?
+- **UX e estados:** como fica quando funciona? Como fica quando falha? Existem estados intermediários?
+- **Riscos:** o que pode quebrar isto? O que acontece no caso degradado?
+- **Decisões fechadas:** existe alguma decisão que o usuário já tomou e não quer reabrir?
 
-- Use concrete questions, not open-ended ones. ❌ "How do you imagine persistence?" → ✅ "Is persistence localStorage, IndexedDB, or a JSON file on disk?"
-- When you offer options, give 2–4, mark which one is your recommendation and why.
-- If your agent exposes a native multiple-choice question tool (in Claude Code: `AskUserQuestion`), use it for these blocks instead of writing the options as prose — the user picks instead of typing. Put your recommendation first and label it. Fall back to a numbered markdown list when no such tool exists.
-- If you spot an answer that would open Pandora's box (e.g. "and we also want multiplayer"), point out that it deserves its own spec and ask whether we leave it out of this one's scope.
+**Como formular as perguntas:**
 
-**When to stop asking:**
+- Use perguntas concretas, não abertas. ❌ "Como você imagina a persistência?" → ✅ "A persistência é localStorage, IndexedDB ou um arquivo JSON em disco?"
+- Quando oferecer opções, dê 2–4, marque qual é a sua recomendação e por quê.
+- Se o seu agente expõe uma ferramenta nativa de pergunta de múltipla escolha (no Claude Code: `AskUserQuestion`), use-a nesses blocos em vez de escrever as opções como texto — o usuário escolhe em vez de digitar. Coloque a sua recomendação primeiro e rotule-a. Recorra a uma lista numerada em markdown quando essa ferramenta não existir.
+- Se você identificar uma resposta que abriria a caixa de Pandora (ex.: "e também queremos multiplayer"), aponte que ela merece uma spec própria e pergunte se deixamos isso fora do escopo desta.
 
-Stop when you can answer these three questions without assuming anything:
+**Quando parar de perguntar:**
 
-1. Which files will appear or change?
-2. What is the first executable step and what is the last one?
-3. How do I verify the feature is finished?
+Pare quando você conseguir responder estas três perguntas sem supor nada:
 
-If you still cannot answer one of them, keep asking.
+1. Quais arquivos vão aparecer ou mudar?
+2. Qual é o primeiro passo executável e qual é o último?
+3. Como eu verifico que a feature está pronta?
 
-### Phase 3 — Write the spec
+Se você ainda não consegue responder alguma delas, continue perguntando.
 
-Once Phase 2 is closed, decide how to write it:
+### Fase 3 — Escreva a spec
 
-**If you already have all the information you need** — meaning you can answer the three Phase 2 questions (which files change, what the first and last executable steps are, how to verify it is finished) **without assuming anything** — then **do not go section by section**. Write the complete spec and jump straight to Phase 4 to save the file. Do not ask for section-by-section confirmation, and do not show a draft for approval first: the user already answered everything in Phase 2, and re-asking is friction. The user reviews the saved file and asks for changes if needed.
+Com a Fase 2 encerrada, decida como escrever:
 
-**Only if information is still missing** (the user cut Phase 2 short, an answer was vague, or some section cannot be written without inventing something), develop the sections **one by one**, showing each one and waiting for confirmation before moving to the next.
+**Se você já tem toda a informação de que precisa** — ou seja, consegue responder às três perguntas da Fase 2 (quais arquivos mudam, quais são o primeiro e o último passos executáveis, como verificar que está pronta) **sem supor nada** — então **não vá seção por seção**. Escreva a spec completa e vá direto para a Fase 4 para salvar o arquivo. Não peça confirmação seção a seção, e não mostre um rascunho para aprovação antes: o usuário já respondeu tudo na Fase 2, e perguntar de novo é atrito. O usuário revisa o arquivo salvo e pede mudanças se precisar.
 
-In both cases the content follows the same order:
+**Só se ainda faltar informação** (o usuário cortou a Fase 2, uma resposta foi vaga, ou alguma seção não pode ser escrita sem inventar algo), desenvolva as seções **uma a uma**, mostrando cada uma e esperando confirmação antes de passar para a próxima.
 
-1. **Header** (state, dependencies, date, one-sentence objective). The one-sentence objective is critical — if it does not fit in one sentence, go back to Phase 2.
-2. **Scope** (what is in and what is NOT). The "not in" must be explicit.
-3. **Data model** (concrete structures with real names). If the feature introduces no new data, skip this section and say so explicitly.
-4. **Implementation plan** (numbered steps, each leaving the system functional).
-5. **Acceptance criteria** (boolean checklist, not aspirational).
-6. **Decisions taken and discarded** (with brief justification).
-7. **Identified risks** (only if applicable — if no relevant risks exist, skip it).
+Nos dois casos o conteúdo segue a mesma ordem:
 
-**After each section (only in the section-by-section mode):**
+1. **Cabeçalho** (estado, dependências, data, objetivo em uma frase). O objetivo em uma frase é crítico — se não couber em uma frase, volte para a Fase 2.
+2. **Escopo** (o que está dentro e o que NÃO está). O "não está" precisa ser explícito.
+3. **Modelo de dados** (estruturas concretas com nomes reais). Se a feature não introduz dados novos, pule esta seção e diga isso explicitamente.
+4. **Plano de implementação** (passos numerados, cada um deixando o sistema funcional).
+5. **Critérios de aceite** (checklist booleano, não aspiracional).
+6. **Decisões tomadas e descartadas** (com justificativa breve).
+7. **Riscos identificados** (apenas se aplicável — se não houver riscos relevantes, pule).
 
-- Show it formatted in markdown.
-- Ask: "Does this section stay like this or do you want to tweak it?"
-- If the user requests changes, apply them and show again.
-- Only move to the next section once the user confirms.
+**Depois de cada seção (apenas no modo seção por seção):**
 
-**Common mistakes to avoid:**
+- Mostre a seção formatada em markdown.
+- Pergunte: "Esta seção fica assim ou você quer ajustar algo?"
+- Se o usuário pedir mudanças, aplique e mostre de novo.
+- Só passe para a próxima seção quando o usuário confirmar.
 
-- Generating acceptance criteria that are not verifiable ("that it works well").
-- Putting things into the implementation plan that are not in the scope.
-- Assuming file names or structures the user did not confirm.
-- Skipping the decisions section — that section is the one with the most long-term value.
+**Erros comuns a evitar:**
 
-### Phase 4 — Save the spec
+- Gerar critérios de aceite que não são verificáveis ("que funcione bem").
+- Colocar no plano de implementação coisas que não estão no escopo.
+- Supor nomes de arquivos ou estruturas que o usuário não confirmou.
+- Pular a seção de decisões — é a seção com mais valor no longo prazo.
+- Escrever critérios de aceite sem um item verificável de testes (`a suíte passa por inteiro`, não `tem testes`) e um plano cujos passos não carregam o teste junto — ver a skill `unit-testing-standards`.
 
-When the content is ready (either because you had everything, or because all sections were confirmed):
+### Fase 4 — Salve a spec
 
-1. Determine the next sequential number from the `specs/` listing in the session context. Take the highest existing number and add one, zero-padded to two digits. If the last one is `02-powerups.md`, this one will be `03-`. If `specs/` is empty or missing, start at `01-`.
-2. Generate a short kebab-case slug from the objective (e.g. `levels-and-highscores`). See **Arguments** below for when `$ARGUMENTS` is the slug instead.
-3. Use the date from the session context above for the `**Date:**` field. **Never write a date you did not read from there.**
-4. Write the file directly at `specs/NN-slug.md` with all the sections. **Do not ask for permission to write it and do not ask whether the file name works** — announce the path in the final confirmation. Only ask if the target file already exists.
-5. Mark the state as `Draft` by default (or the equivalent word used by the existing specs in this repo). **Do not mark it as `Approved` automatically** — the user does that once they have re-read it.
-6. If the header lists dependencies (`**Depends on:** SPEC 01`), check that each referenced spec actually exists in `specs/`. If one does not, say so instead of writing a dangling reference.
-7. **Seed the config file if it does not exist.** Check for `specs/.spec-config.yml`. If it is **missing**, create it with the default content below. If it **already exists, leave it untouched** — never overwrite the user's settings.
+Quando o conteúdo estiver pronto (ou porque você já tinha tudo, ou porque todas as seções foram confirmadas):
+
+1. Determine o próximo número sequencial a partir da listagem de `specs/` no contexto da sessão. Pegue o maior número existente e some um, com dois dígitos. Se a última é `02-powerups.md`, esta será `03-`. Se `specs/` está vazia ou não existe, comece em `01-`.
+2. Gere um slug curto em kebab-case a partir do objetivo (ex.: `levels-and-highscores`). Veja **Argumentos** abaixo para o caso em que `$ARGUMENTS` é o slug.
+3. Use a data do contexto da sessão acima no campo `**Data:**`. **Nunca escreva uma data que você não leu de lá.**
+4. Escreva o arquivo direto em `specs/NN-slug.md` com todas as seções. **Não peça permissão para escrever e não pergunte se o nome do arquivo serve** — anuncie o caminho na confirmação final. Só pergunte se o arquivo de destino já existir.
+5. Marque o estado como `Rascunho` por padrão (ou a palavra equivalente usada pelas specs existentes neste repositório). **Não marque como `Aprovado` automaticamente** — o usuário faz isso depois de reler.
+6. Se o cabeçalho listar dependências (`**Depende de:** SPEC 01`), verifique se cada spec referenciada realmente existe em `specs/`. Se alguma não existir, diga isso em vez de escrever uma referência quebrada.
+7. **Semeie o arquivo de configuração se ele não existir.** Verifique `specs/.spec-config.yml`. Se estiver **ausente**, crie com o conteúdo padrão abaixo. Se **já existir, deixe intocado** — nunca sobrescreva as configurações do usuário.
 
    ```yaml
-   # spec workflow configuration
+   # configuração do fluxo de spec
    #
-   # AutoCreateBranch — controls whether /spec-impl creates the git branch automatically.
-   #   true  (default) → /spec-impl creates and switches to spec-NN-slug without asking
-   #   false           → /spec-impl asks for [y/N] confirmation before creating the branch
+   # AutoCreateBranch — controla se o /spec-impl cria a branch git automaticamente.
+   #   true  (padrão) → o /spec-impl cria e muda para spec-NN-slug sem perguntar
+   #   false          → o /spec-impl pede confirmação [y/N] antes de criar a branch
    AutoCreateBranch: true
    ```
 
-8. Confirm to the user:
-   - Path of the created file.
-   - Reminder: the spec is in `Draft` state. Change it to `Approved` once you have re-read it.
-   - If you just created `specs/.spec-config.yml`, mention it exists and that `AutoCreateBranch` defaults to `true` (set it to `false` to control branch creation yourself).
-   - Next step: once reviewed and approved, run `/spec-impl NN-slug` to implement it.
-   - **Stop here.** Do not propose implementing the spec, writing code, or taking any further action beyond this confirmation.
+8. Confirme ao usuário:
+   - Caminho do arquivo criado.
+   - Lembrete: a spec está em estado `Rascunho`. Mude para `Aprovado` depois de reler.
+   - Se você acabou de criar `specs/.spec-config.yml`, mencione que ele existe e que `AutoCreateBranch` é `true` por padrão (defina `false` para controlar a criação de branch você mesmo).
+   - Próximo passo: depois de revisada e aprovada, rode `/spec-impl NN-slug` para implementá-la.
+   - **Pare aqui.** Não proponha implementar a spec, escrever código nem qualquer outra ação além desta confirmação.
 
-## Hard rules
+## Regras absolutas
 
-- **Never write code during this command.** Only the spec's `.md` file at the end.
-- **Never propose implementing the spec after saving it.** Your job ends when the file is written. The user runs `/spec-impl` when they are ready.
-- **Never assume decisions the user did not confirm.** If you are missing information, ask — in Phase 2, which is where the questions belong.
-- **Do not re-ask in Phase 3 what was already answered in Phase 2.** If the information is complete, write the whole spec and save it. Section-by-section confirmation is the fallback for incomplete information, not the default.
-- **If the user wants to speed up and skip Phase 2**, remind them: "Questions now save hours later. Are you sure you want to skip them?". If they insist, respect their decision but record it in the spec's decisions section ("Quick definition without detailed clarification").
-- **If the feature is too big** (does not fit in one sentence, touches more than three areas of the system, requires decisions in four or more domains), propose splitting it into two or more specs before continuing.
+- **Nunca escreva código durante este comando.** Apenas o arquivo `.md` da spec no final.
+- **Nunca proponha implementar a spec depois de salvá-la.** Seu trabalho termina quando o arquivo é escrito. O usuário roda `/spec-impl` quando estiver pronto.
+- **Nunca assuma decisões que o usuário não confirmou.** Se faltar informação, pergunte — na Fase 2, que é onde as perguntas pertencem.
+- **Não pergunte de novo na Fase 3 o que já foi respondido na Fase 2.** Se a informação está completa, escreva a spec inteira e salve. A confirmação seção por seção é o recurso para informação incompleta, não o padrão.
+- **Se o usuário quiser acelerar e pular a Fase 2**, lembre: "Perguntas agora economizam horas depois. Tem certeza de que quer pular?". Se ele insistir, respeite a decisão dele mas registre na seção de decisões da spec ("Definição rápida, sem clarificação detalhada").
+- **Se a feature for grande demais** (não cabe em uma frase, toca mais de três áreas do sistema, exige decisões em quatro ou mais domínios), proponha dividi-la em duas ou mais specs antes de continuar.
 
-## Tone when asking questions
+## Tom ao fazer perguntas
 
-Be direct and specific. Do not apologize for asking. Do not use phrases like "if you don't mind..." or "could you maybe...". The user invoked this skill precisely because they want you to ask questions. Use concrete questions, one per line when there are several, and number them so they are easy to answer.
+Seja direto e específico. Não peça desculpas por perguntar. Não use frases como "se você não se importar..." ou "será que você poderia...". O usuário invocou esta skill exatamente porque quer que você faça perguntas. Use perguntas concretas, uma por linha quando houver várias, e numere-as para ficarem fáceis de responder.
 
-Example of a well-formed block:
+Exemplo de um bloco bem formado:
 
-> Before writing the data model I need to clarify three things:
+> Antes de escrever o modelo de dados preciso clarificar três coisas:
 >
-> 1. **Persistence.** localStorage, IndexedDB, or a JSON file on disk? Recommendation: localStorage if the data fits in <5MB and does not need queries.
-> 2. **Schema versioning.** What happens when the format changes? Options: (a) version prefix in the key, (b) ignore and rebuild, (c) migrate on load.
-> 3. **Privacy.** Is the data sensitive? If yes, is it encrypted? Is it deleted on logout?
+> 1. **Persistência.** localStorage, IndexedDB ou um arquivo JSON em disco? Recomendação: localStorage se os dados couberem em <5MB e não precisarem de consultas.
+> 2. **Versionamento de schema.** O que acontece quando o formato muda? Opções: (a) prefixo de versão na chave, (b) ignorar e reconstruir, (c) migrar no carregamento.
+> 3. **Privacidade.** Os dados são sensíveis? Se sim, estão cifrados? São apagados no logout?
 
-## Arguments
+## Argumentos
 
-`$ARGUMENTS` is **the feature description**, not the file name. Treat it as the starting point for Phase 1 and derive the slug from the objective in Phase 4.
+`$ARGUMENTS` é **a descrição da feature**, não o nome do arquivo. Trate-o como ponto de partida da Fase 1 e derive o slug do objetivo na Fase 4.
 
-The one exception: if `$ARGUMENTS` is already a single kebab-case token with no spaces (e.g. `/spec levels-and-highscores`), it is ambiguous between a description and a slug — use it as the slug **and** as the seed of the description, without asking for confirmation.
+A única exceção: se `$ARGUMENTS` já for um único token em kebab-case sem espaços (ex.: `/spec levels-and-highscores`), ele é ambíguo entre descrição e slug — use-o como slug **e** como semente da descrição, sem pedir confirmação.
 
-If they invoked `/spec` without arguments, start by asking for the one-sentence description.
+Se invocaram `/spec` sem argumentos, comece pedindo a descrição em uma frase.
